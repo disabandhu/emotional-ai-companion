@@ -11,10 +11,10 @@ def detect_emotion(text):
     }
 
     # Keyword mapping (basic but effective)
-    sadness_words = ["sad", "tired", "empty", "lonely", "depressed"]
-    anxiety_words = ["worried", "anxious", "nervous", "stress", "panic"]
-    happiness_words = ["happy", "excited", "good", "great", "love"]
-    anger_words = ["angry", "mad", "frustrated", "annoyed"]
+    sadness_words = ["sad", "tired", "empty", "lonely", "depressed", "down", "hurt"]
+    anxiety_words = ["worried", "anxious", "nervous", "stress", "panic", "overthinking"]
+    happiness_words = ["happy", "excited", "good", "great", "love", "amazing", "joy"]
+    anger_words = ["angry", "mad", "frustrated", "annoyed", "irritated"]
 
     for word in sadness_words:
         if word in text:
