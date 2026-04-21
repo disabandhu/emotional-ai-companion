@@ -3,8 +3,9 @@ from emotion import detect_emotion
 from fuzzy import infer_strategy
 from responses import generate_response
 from ga import run_ga
+import time
 
-# ---------- GLOBAL UI STYLE (CONSTANT BACKGROUND) ----------
+# ---------- GLOBAL UI STYLE ----------
 st.markdown("""
 <style>
 
@@ -72,7 +73,6 @@ h1, h2, h3, h4, h5, h6, p, label, span {
 """, unsafe_allow_html=True)
 # ----------------------------------------------------------
 
-
 st.title("🌌 Lily")
 
 user_input = st.text_input("Say something...")
@@ -80,39 +80,60 @@ user_input = st.text_input("Say something...")
 if user_input:
     emotions = detect_emotion(user_input)
 
-    # (BACKGROUND LOGIC REMOVED — now constant)
-
     best_personality = run_ga(emotions)
     empathy, humor, directness = best_personality
 
     strategy, scores = infer_strategy(emotions)
 
-    response = generate_response(strategy, {
-        "empathy": empathy,
-        "humor": humor,
-        "directness": directness
-    })
+    # ✅ FIX: pass emotions into response system
+    response = generate_response(
+        strategy,
+        {
+            "empathy": empathy,
+            "humor": humor,
+            "directness": directness
+        },
+        emotions
+    )
 
-    st.write("Emotions:", emotions)
-    st.write("Strategy:", strategy)
-    import time
-
-    st.write("Response:")
+    # ----------- RESPONSE FIRST (TYPING EFFECT) -----------
+    st.markdown("### 🤖 Lily says:")
 
     placeholder = st.empty()
     typed_text = ""
 
     for char in response:
         typed_text += char
-        placeholder.markdown(f"<div style='font-size:18px'>{typed_text}</div>", unsafe_allow_html=True)
-        time.sleep(0.02)
+        placeholder.markdown(f"""
+        <div style="
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 18px;
+        ">
+        {typed_text}
+        </div>
+        """, unsafe_allow_html=True)
+        time.sleep(0.015)
 
-    st.write("🧬 Evolved Personality:")
-    st.write({
-        "empathy": float(empathy),
-        "humor": float(humor),
-        "directness": float(directness)
-    })
+    # ----------- EMOTION BREAKDOWN -----------
+    st.markdown("### 🧠 Emotion Breakdown")
+
+    for emo, val in emotions.items():
+        st.progress(val)
+        st.caption(f"{emo}: {round(val, 2)}")
+
+    # ----------- STRATEGY -----------
+    st.markdown("### 🎯 Strategy Chosen")
+    st.write(strategy)
+
+    # ----------- PERSONALITY -----------
+    st.markdown("### 🧬 Evolved Personality")
+
+    st.slider("Empathy", 0.0, 1.0, float(empathy), disabled=True)
+    st.slider("Humor", 0.0, 1.0, float(humor), disabled=True)
+    st.slider("Directness", 0.0, 1.0, float(directness), disabled=True)
 
 else:
     st.info("Start typing to activate the emotional AI.")

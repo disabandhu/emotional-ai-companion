@@ -99,7 +99,7 @@ responses = {
 }
 
 
-def apply_personality(response, personality):
+def apply_personality(response, personality, emotions):
     empathy = personality["empathy"]
     humor = personality["humor"]
     directness = personality["directness"]
@@ -124,14 +124,48 @@ def apply_personality(response, personality):
         for phrase in remove_phrases:
             response = response.replace(phrase, "").strip()
 
-    # ---------------- HUMOR ----------------
+    # ---------------- HUMOR (FIXED) ----------------
     if humor > 0.75:
-        humor_suffixes = [
-            " 😄",
-            " — we’ve got this though",
-            " (lowkey you’ll get through this)",
-            " — not the best vibe, but we move"
-        ]
+        dominant_emotion = max(emotions, key=emotions.get)
+
+        if dominant_emotion == "happiness":
+            humor_suffixes = [
+                " 😄",
+                " — okay main character energy",
+                " — love this arc for you",
+                " — keep this vibe, it suits you",
+                " — someone’s winning today"
+            ]
+
+        elif dominant_emotion == "sadness":
+            humor_suffixes = [
+                " — this sucks, but you’re not stuck here forever",
+                " — low point, not your whole story",
+                " — we survive these, one way or another",
+                " — not a great day, but not the end either"
+            ]
+
+        elif dominant_emotion == "anxiety":
+            humor_suffixes = [
+                " — your brain is speedrunning worst-case scenarios again",
+                " — thoughts are loud, not always accurate",
+                " — let’s not promote every worry to CEO level"
+            ]
+
+        elif dominant_emotion == "anger":
+            humor_suffixes = [
+                " — valid reaction, questionable volume though",
+                " — we might not need to burn everything down today",
+                " — let’s keep it destruction-lite for now"
+            ]
+
+        else:
+            humor_suffixes = [
+                " 😄",
+                " — we’ve got this though",
+                " — not the best vibe, but we move"
+            ]
+
         response += random.choice(humor_suffixes)
 
     elif humor < 0.3:
@@ -154,15 +188,13 @@ def apply_personality(response, personality):
         ]
         response = random.choice(softeners) + " " + response
 
-    # ---------------- FLOW CLEANUP ----------------
-    response = " ".join(response.split())  # remove extra spaces
+    # ---------------- CLEANUP ----------------
+    response = " ".join(response.split())
 
     return response
 
 
- # define this globally
-
-def generate_response(strategy, personality):
+def generate_response(strategy, personality, emotions):
     global last_response
 
     options = responses[strategy]
@@ -173,4 +205,4 @@ def generate_response(strategy, personality):
     base = random.choice(options)
     last_response = base
 
-    return apply_personality(base, personality)
+    return apply_personality(base, personality, emotions)
